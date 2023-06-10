@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import generics
-from .models import MenuItem
-from .serializers import MenuItemSerializer
+from .models import MenuItem, Order, OrderItem, Cart, Category
+from .serializers import MenuItemSerializer, OrderSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
@@ -19,6 +19,32 @@ from django.contrib.auth.models import User, Group
 # Create your views here.
 class MenuItemView(generics.ListCreateAPIView):
     queryset = MenuItem.objects.all()
+    # def get(request):            
+    #     items = MenuItem.objects.select_related('category').all() #for a single call
+    #     category_name = request.query_params.get('category') #filter
+    #     to_price = request.query_params.get('to_price') #filter
+    #     search = request.query_params.get('search') #search
+    #     perpage = request.query_params.get('perpage', default=10) #pagination
+    #     page = request.query_params.get('page', default=1)#pagination
+    #     if category_name: #filter
+    #         items = items.filter(category_title=category_name)#filter
+    #     if to_price: #filter
+    #         items = items.filter(price = to_price) #filter
+    #     if search:
+    #         items = items.filter(title__startswith = search)
+    #     paginator = Paginator(items, per_page=perpage)
+    #     try:
+    #         items = paginator.page(number=page)
+    #     except EmptyPage:
+    #         items = []
+    #     serialized_item = MenuItemSerializer(items, many = True) #many = convert with Json
+    #     return Response(serialized_item.data)
+
+    # def post(request):
+    #     serialized_item = MenuItemSerializer(data=request.data)
+    #     serialized_item.is_valid(raise_exception=True)
+    #     serialized_item.save()
+    #     return Response(serialized_item.data, status.HTTP_201_CREATED)
     serializer_class = MenuItemSerializer
 
 class SingleMenuItem(generics.RetrieveUpdateAPIView, generics.DestroyAPIView):
@@ -40,7 +66,7 @@ def menu_items(request):
         if to_price: #filter
             items = items.filter(price = to_price) #filter
         if search:
-            items = items.filter(title__startswith = search)
+            items = items.filter(title__icontains = search)
         paginator = Paginator(items, per_page=perpage)
         try:
             items = paginator.page(number=page)
@@ -54,11 +80,34 @@ def menu_items(request):
         serialized_item.save()
         return Response(serialized_item.data, status.HTTP_201_CREATED)
 
+@api_view(['GET'])
+def single_item(request, pk):    
+    if request:      
+        item = get_object_or_404(MenuItem, pk=pk)
+        serialized_item = MenuItemSerializer(item)
+        return Response(serialized_item.data)
+
+
+@api_view(['GET', 'POST'])
+def orders(request):
+    if request.method == 'GET': 
+        items = Order.objects.all()    
+        serialized_items = OrderSerializer(data = list(items), many = True)
+        serialized_items.is_valid(raise_exception=True)
+        return Response(serialized_items.data)
+    elif request.method == "POST":
+        serialized_items = OrderSerializer(data=request.data)
+        serialized_items.is_valid(raise_exception=True)
+        serialized_items.save()
+        return Response(serialized_items.data)
+
+
+
 @api_view
-def single_item(request, id):
-    item = get_object_or_404(MenuItem, pk=id)
-    serialized_item = MenuItemSerializer(item)
-    return Response(serialized_item.data)
+def orders_item(request, id):
+    item = get_object_or_404(Order, pk = id)
+    serializer_item = OrderSerializer(item)
+    return Response(serializer_item.data)
 
 
 
