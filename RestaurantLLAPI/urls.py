@@ -6,7 +6,7 @@ urlpatterns = [
     path('menu-items', views.menu_items), 
     path('menu-items/<int:pk>', views.single_item),
     path('orders', views.orders),
-    path('orders/<int:id>', views.orders_item),
+    path('orders/<int:pk>', views.orders_item),
     
     # path('menu-items', views.menu_items),
     # path('menu-items/<int:id>', views.single_item),

@@ -18,33 +18,7 @@ from django.contrib.auth.models import User, Group
 
 # Create your views here.
 class MenuItemView(generics.ListCreateAPIView):
-    queryset = MenuItem.objects.all()
-    # def get(request):            
-    #     items = MenuItem.objects.select_related('category').all() #for a single call
-    #     category_name = request.query_params.get('category') #filter
-    #     to_price = request.query_params.get('to_price') #filter
-    #     search = request.query_params.get('search') #search
-    #     perpage = request.query_params.get('perpage', default=10) #pagination
-    #     page = request.query_params.get('page', default=1)#pagination
-    #     if category_name: #filter
-    #         items = items.filter(category_title=category_name)#filter
-    #     if to_price: #filter
-    #         items = items.filter(price = to_price) #filter
-    #     if search:
-    #         items = items.filter(title__startswith = search)
-    #     paginator = Paginator(items, per_page=perpage)
-    #     try:
-    #         items = paginator.page(number=page)
-    #     except EmptyPage:
-    #         items = []
-    #     serialized_item = MenuItemSerializer(items, many = True) #many = convert with Json
-    #     return Response(serialized_item.data)
-
-    # def post(request):
-    #     serialized_item = MenuItemSerializer(data=request.data)
-    #     serialized_item.is_valid(raise_exception=True)
-    #     serialized_item.save()
-    #     return Response(serialized_item.data, status.HTTP_201_CREATED)
+    queryset = MenuItem.objects.all()    
     serializer_class = MenuItemSerializer
 
 class SingleMenuItem(generics.RetrieveUpdateAPIView, generics.DestroyAPIView):
@@ -104,10 +78,21 @@ def orders(request):
 
 
 @api_view
-def orders_item(request, id):
-    item = get_object_or_404(Order, pk = id)
-    serializer_item = OrderSerializer(item)
-    return Response(serializer_item.data)
+def orders_item(request, pk):
+    if request:
+        item = get_object_or_404(Order, pk = pk)
+        serializer_item = OrderSerializer(item)
+        return Response(serializer_item.data)
+
+
+
+@api_view(['GET', 'POST'])
+def cart(request,pk):
+    items = Cart.objects.all()
+    if request.method == 'GET':
+        carts = Cart.objects.filter(user=str(id))
+        serialized_carts = CartSerializer(carts, many=True)
+        return Response(serialized_carts)
 
 
 

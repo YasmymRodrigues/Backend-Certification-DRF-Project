@@ -70,3 +70,10 @@ class OrderItemSerializer(serializers.ModelSerializer):
          model = OrderItem
          fields =['order', 'menuitem', 'quantity', 'unit_price', 'price']
          #extra_kwargs = {}
+
+class CartSerializer(serializers.ModelSerializer):
+    menuitem_name = serializers.CharField(source='menuitem.title', read_only=True)
+    user_name = serializers.CharField(source='user.name', read_only=True)
+    class Meta:
+         model = Cart
+         fields = ['id', 'user', 'user_name', 'menuitem', 'menuitem_name', 'quantity', 'unit_price', 'price']
